@@ -1,15 +1,14 @@
 /*-------------------------------------------------------------------------*\
 
-You can redistribute this code and/or modify this code under the 
-terms of the GNU General Public License (GPL) as published by the  
-Free Software Foundation, either version 3 of the License, or (at 
+This file is part of libvoxel, a C++ template library for handelling 3D images.
+
+Developed by:
+ - Ali Q Raeini (2009-2021)
+
+You can redistribute this code and/or modify this code under the
+terms of the GNU General Public License (GPL) as published by the
+Free Software Foundation, either version 3 of the License, or (at
 your option) any later version. see <http://www.gnu.org/licenses/>.
-
-Please see our website for relavant literature making use of this code:
-https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-modelling/
-
-For further information please contact us by email:
-Ali Q Raeini: a.q.raeini@imperial.ac.uk
 
 \*-------------------------------------------------------------------------*/
 
@@ -65,7 +64,7 @@ int main(int argc, char** argv)  {
 
 
 	vxlImg.threshold101(0,0);
-	
+
 	vxlImg.growBox(1);
 	vxlImg.FaceMedian06(1,5);
 	vxlImg.FaceMedian06(1,5);	//vxlImg.FaceMedian06(2,4);
@@ -443,7 +442,7 @@ const int
 				  else                         {juclockwiserecordF( Internal);}
 				}else if (neiv) {juclockwiserecordF( neiv)}
 				else                           {juclockwiserecordF( Top)}
-				
+
 
 				neiv=vxlImg(ix,iy,iz-1);
 				if (iz!=1)  {
@@ -593,7 +592,7 @@ void fixImage(voxelImage& voxels)  {
 		//cout<<nchanges<<endl;
 	}
 	//cout<<endl;
-	
+
 	unsigned int nRegs=1;
 	for (int k=0; k<vxlsMids.nz(); ++k)
 	 for (int j=0; j<vxlsMids.ny(); ++j)
@@ -727,4 +726,3 @@ void fixImage(voxelImage& voxels)  {
 	//voxels.write("dump2.mhd");
 
 }
-

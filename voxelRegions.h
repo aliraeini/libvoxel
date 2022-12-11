@@ -1,14 +1,14 @@
 /*-------------------------------------------------------------------------*\
 
-This file is part of voxelImage library, a C++ template library  
-developed by Ali Qaseminejad Raeini for handelling 3D raw images.
+This file is part of libvoxel, a C++ template library for handelling 3D images.
 
+Developed by:
+ - Ali Q Raeini (2010-2022)
 
-Please see our website for relavant literature making use of this code:
-https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-modelling/
-
-For further information please contact us by email:
-Ali Q Raeini: a.q.raeini@imperial.ac.uk
+You can redistribute this code and/or modify this code under the
+terms of the GNU General Public License (GPL) as published by the
+Free Software Foundation, either version 3 of the License, or (at
+your option) any later version. see <http://www.gnu.org/licenses/>.
 
 \*-------------------------------------------------------------------------*/
 
@@ -71,7 +71,7 @@ voxelImageT<int> labelImage(const voxelImageT<T>& vImage, const T minvv=0, const
 		{	int vv = lbls(i,j,k);
 			if(vv<bigN) { if(vv!=oldvv) { oldvv=lbls(i,j,k); lbls(i,j,k) = ++il; } else lbls(i,j,k) = il; }
 			else oldvv=-1;
-		} 
+		}
 		cout<<"max_il: "<<il<<endl;
 	}
 

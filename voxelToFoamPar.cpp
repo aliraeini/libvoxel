@@ -9,7 +9,7 @@ Please see our website for relavant literature making use of this code:
 https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-modelling/
 
 For further information please contact us by email:
-Ali Q Raeini: a.q.raeini@imperial.ac.uk
+Ali Q Raeini: a.q.raeini@gmail.com
 
 \*-------------------------------------------------------------------------*/
 
@@ -507,7 +507,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 			  else            juclockwiseRecordF(Internal)  }
 			else if (neiv)    juclockwiseRecordF(neiv)
 			else              juclockwiseRecordF(Top)
-			
+
 
 			neiv=vxlImg(ix,iy,iz-1);
 			if (iz!=1)  {
@@ -602,6 +602,3 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	cout<<" :/ "<<endl;
 
 }
-
-
-

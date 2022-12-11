@@ -1,13 +1,14 @@
 /*-------------------------------------------------------------------------*\
+
+This file is part of libvoxel, a C++ template library for handelling 3D images.
+
+Developed by:
+ - Ali Q Raeini (2010-2022)
+
 You can redistribute this code and/or modify this code under the
-terms of the GNU General Public License (GPL) as published by the 
+terms of the GNU General Public License (GPL) as published by the
 Free Software Foundation, either version 3 of the License, or (at
 your option) any later version. see <http://www.gnu.org/licenses/>.
-
-The code is part of voxLib, developed by Ali Qaseminejad Raeini
-
-For further information please contact me by email:
-Ali Q Raeini: a.q.raeini@imperial.ac.uk
 
 \*-------------------------------------------------------------------------*/
 
@@ -85,5 +86,3 @@ int main(int argc, char *argv[])  {
 
 	return 0;
 }
-
-

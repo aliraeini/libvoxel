@@ -1,15 +1,15 @@
 
 /*-------------------------------------------------------------------------*\
 
-This file is part of voxelImage library, a C++ template library  
-developed by Ali Qaseminejad Raeini for handelling 3D raw images.
+This file is part of libvoxel, a C++ template library for handelling 3D images.
 
+Developed by:
+ - Ali Q Raeini (2010-2022)
 
-Please see our website for relavant literature making use of this code:
-https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-modelling/
-
-For further information please contact us by email:
-Ali Q Raeini: a.q.raeini@imperial.ac.uk
+You can redistribute this code and/or modify this code under the
+terms of the GNU General Public License (GPL) as published by the
+Free Software Foundation, either version 3 of the License, or (at
+your option) any later version. see <http://www.gnu.org/licenses/>.
 
 \*-------------------------------------------------------------------------*/
 
@@ -20,11 +20,10 @@ Ali Q Raeini: a.q.raeini@imperial.ac.uk
 #include <vector>
 #include <iostream>
 #include "voxelImage.h"
-	
+
 #include <functional>   // std::mem_fn
 
-namespace MCTProcessing
-{
+								namespace MCTProcessing _begins_
  using namespace std;
  class shape
  {
@@ -32,7 +31,7 @@ namespace MCTProcessing
 	const static int invalidv = 0x80000000; // 2147483648 largest negative
 	int insidev, outsidev;
 	shape() : insidev(0), outsidev(invalidv) {};
-	virtual ~shape() {}; 
+	virtual ~shape() {};
 	virtual int value(dbl3)=0;
 	virtual int isBefore(dbl3) { return false; };
 	virtual int isAfter(dbl3) { return false; };
@@ -104,7 +103,7 @@ namespace MCTProcessing
   public:
 	layer(stringstream & ins)
 	: nrm(0,1,0)
-	{	dbl3 Pl; //point through bottom plate, 
+	{	dbl3 Pl; //point through bottom plate,
 		ins>>Pl>>nrm>>insidev>>outsidev; p2=mag(nrm); nrm/=p2;  p1=Pl&nrm; p2+=p1;
 		cout <<"  layer  p1="<<Pl<<",  height="<<p2-p1<<",  normal="<<nrm<<",  insidev="<<insidev<<endl;
 	};
@@ -124,7 +123,7 @@ namespace MCTProcessing
 		ins>>p1;   p2 = p1;   p1.y=0.; ins>>p1.y;
 		cout <<"\nparaPlates: slope1,mX="<<p1.x<<"    separation,dy="<<p2.y<<"   slope2,mZ="<<p1.z<<"   shift, y1:"<<p1.y<<endl;
 	};
-	int value(dbl3 ij)    {  return ( ij.y > p1.x*ij.x+p1.z*ij.z+p1.y 
+	int value(dbl3 ij)    {  return ( ij.y > p1.x*ij.x+p1.z*ij.z+p1.y
 		                           && ij.y < p2.x*ij.x+p2.z*ij.z+p2.y )  ? insidev : outsidev;  }
 	int isBefore(dbl3 ij) {  return ( ij.y < p2.x*ij.x+p2.z*ij.z+p2.y ); }// used for network cut
 	int isAfter (dbl3 ij) {  return ( ij.y > p1.x*ij.x+p1.z*ij.z+p1.y );  }
@@ -139,7 +138,7 @@ namespace MCTProcessing
 		cout <<"\nkube: "<<p1<<" + "<<p2<<" in: "<<insidev<<"  out: "<<outsidev<<endl;
 		p2+=p1;
 	};
-	int value(dbl3 ij)  {  return ij.x >= p1.x && ij.y >= p1.y && ij.z >= p1.z &&   ij.x < p2.x && ij.y < p2.y && ij.z < p2.z  
+	int value(dbl3 ij)  {  return ij.x >= p1.x && ij.y >= p1.y && ij.z >= p1.z &&   ij.x < p2.x && ij.y < p2.y && ij.z < p2.z
 		                             ? insidev : outsidev;  }
  };
 
@@ -148,7 +147,7 @@ namespace MCTProcessing
 	dbl3 p1,p2, po_;
   public:
 
-	plate(stringstream & ins) 
+	plate(stringstream & ins)
 	{cout<<"Error: fix me saqdakjoigfgfgfg "<<endl;
 		ins>>p1>>po_; p2=p1;
 		cout <<"\n plate: slope_x="<<p1.x<<"  r_cap="<<p1.y<<"  slope_z="<<p1.z<<"\n"<<endl;
@@ -166,7 +165,7 @@ namespace MCTProcessing
 	{
 		double rr;
 		ins>>p1 >>rr >>insidev>>outsidev;		r2=rr*rr;
-		cout <<"sphere: p1="<<p1<<"    r^2="<<std::sqrt(r2)<<endl;
+		cout <<"sphere: p1="<<p1<<"    r="<<rr<<endl;
 	}
 	int value(dbl3 ij)  {  return   ( magSqr(ij-p1)<r2 )  ?  insidev : outsidev;  }
 
@@ -218,7 +217,7 @@ namespace MCTProcessing
 	else if (tmpc[0]=='k')  kube(ins)._operate_(vImg); \
 	else if (tmpc[0]=='l')  layer(ins)._operate_(vImg); \
 	else if (tmpc[0]=='c')  cylinder(ins)._operate_(vImg); \
-	else cout <<"unsupported shape type: "<<tmpc<<"\n"<<endl 
+	else cout <<"unsupported shape type: "<<tmpc<<"\n"<<endl
 
  template<typename T>  bool Paint( stringstream& ins, voxelImageT<T> & vImg)  {
 	_SHAPERATE(setIn);
@@ -250,5 +249,4 @@ namespace MCTProcessing
 	return true;
  }
 
-}
-
+								_end_of_(namespace MCTProcessing)

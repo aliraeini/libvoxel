@@ -35,7 +35,7 @@ int tifDataType(T)
     {std::type_index(typeid(unsigned char)), SAMPLEFORMAT_UINT},
     {std::type_index(typeid(char)),          SAMPLEFORMAT_INT},
     {std::type_index(typeid(int)),           SAMPLEFORMAT_INT},
-    {std::type_index(typeid(unsigned int)),  SAMPLEFORMAT_UINT},  
+    {std::type_index(typeid(unsigned int)),  SAMPLEFORMAT_UINT},
     {std::type_index(typeid(short)),         SAMPLEFORMAT_INT},
     {std::type_index(typeid(unsigned short)), SAMPLEFORMAT_UINT},
     {std::type_index(typeid(float)),         SAMPLEFORMAT_IEEEFP},
@@ -53,7 +53,7 @@ inline void getTifTags(dbl3& X0_, dbl3& dx_, TIFF *tif)
 	TIFFGetField(tif, TIFFTAG_YRESOLUTION, &dy);
 	dx_={dx,dy,dy};
 
-	float X0=0., Y0=0., Z0=-2.1e30; 
+	float X0=0., Y0=0., Z0=-2.1e30;
 	TIFFGetField(tif, TIFFTAG_XPOSITION, &X0);
 	TIFFGetField(tif, TIFFTAG_YPOSITION, &Y0);
 
@@ -85,7 +85,7 @@ inline void setTifTags(const dbl3& X0_, const dbl3& dx_, TIFF *tif)
 	TIFFSetField(tif, TIFFTAG_YRESOLUTION, dy);
 	//TIFFSetField(tif, TIFFTAG_ZRESOLUTION, dz);, dz=dx_[2]
 
-	
+
 	std::ostringstream ostrim;
 	ostrim<<" dx "<<dx_<<" ";
 	if(mag(X0_)>1e-16) ostrim<<" X0 "<<X0_<<" ";
@@ -106,7 +106,7 @@ template<typename T>   int readTif( voxelField<T>&  aa, std::string fnam )
 	//tsize_t rowsize;
 	//uint32 row;
 	//tsample_t s;
-        
+
 
 	TIFF *tif = (TIFF *) NULL;
 	tif = TIFFOpen(fnam.c_str(), "r");	 if (tif == NULL)	{ alert("Cannot open tif"); return -1; }
@@ -184,7 +184,7 @@ template<typename T>   int writeTif(const voxelField<T>&  aa, std::string fnam) 
 		TIFFSetField(tif, TIFFTAG_PAGENUMBER, pn, npages);
 
 		T aOrig=aa(nx/2,ny/2,pn);  //! Warn if image modified in libtiff
-		TIFFWriteEncodedStrip( tif, 0, const_cast<T *>(&aa(0,0,pn)), nx * ny * sizeof(T) ); 
+		TIFFWriteEncodedStrip( tif, 0, const_cast<T *>(&aa(0,0,pn)), nx * ny * sizeof(T) );
 		if(aOrig!=aa(nx/2,ny/2,pn)) std::cout<<"Warning image modified in libtiff"<<std::endl;
 
 
@@ -198,7 +198,7 @@ template<typename T>   int writeTif(const voxelField<T>&  aa, std::string fnam) 
 }
 
 
-template<typename T>   
+template<typename T>
 int writeTif(const voxelField<T>&  aa, std::string fnam, int iStart,int iEnd , int jStart,int jEnd , int kStart,int kEnd ) {
 
 	voxelImageT<T>  bb;
@@ -210,8 +210,8 @@ int writeTif(const voxelField<T>&  aa, std::string fnam, int iStart,int iEnd , i
 	return writeTif(bb, fnam);
 
 //! approach below complains about LZW compression.
-//! Note although the deflate compression algorithm overal is a better choice, 
-//! for now we have to stick to LZW for portability 
+//! Note although the deflate compression algorithm overal is a better choice,
+//! for now we have to stick to LZW for portability
 //! (specifically because Avizo does not support inflate algorithm).
 
 	uint32 rowsperstrip = uint32(-1);
@@ -293,7 +293,7 @@ inline std::unique_ptr<voxelImageTBase>  readTif(std::string fnam)  {
 		  else               return std::make_unique<voxelImageT<unsigned char>>(fnam);
 		  break;
 		case SAMPLEFORMAT_INT:
-		  if   (nbits==32)    return std::make_unique<voxelImageT<int>>(fnam); 
+		  if   (nbits==32)    return std::make_unique<voxelImageT<int>>(fnam);
 		  else if(nbits==16)  return std::make_unique<voxelImageT<short>>(fnam);
 		  else                return std::make_unique<voxelImageT<char>>(fnam);
 		  break;

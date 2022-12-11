@@ -1,6 +1,6 @@
 
 import os; ''' ========== set up paths  =========== '''
-if not ("msRoot" in os.environ): 
+if not ("msRoot" in os.environ):
   print("try again after running:\nsource .../src/bashrc"); exit(-1);
 from msrc  import *
 
@@ -13,7 +13,7 @@ from msrc  import *
 nErrs=0
 
 with open("voxcylinder.mhd", 'w') as f1:
-	f1.write("""DimSize = 20 20 20 
+	f1.write("""DimSize = 20 20 20
 		Offset =      0    0    0
 		replaceRange 0 255 1
 		reset  dx 1

@@ -1,15 +1,14 @@
 /*-------------------------------------------------------------------------*\
 
-You can redistribute this code and/or modify this code under the 
-terms of the GNU General Public License (GPL) as published by the  
-Free Software Foundation, either version 3 of the License, or (at 
+This file is part of libvoxel, a C++ template library for handelling 3D images.
+
+Developed by:
+ - Ali Q Raeini (2010-2022)
+
+You can redistribute this code and/or modify this code under the
+terms of the GNU General Public License (GPL) as published by the
+Free Software Foundation, either version 3 of the License, or (at
 your option) any later version. see <http://www.gnu.org/licenses/>.
-
-Please see our website for relavant literature making use of this code:
-https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-modelling/
-
-For further information please contact us by email:
-Ali Q Raeini: a.q.raeini@imperial.ac.uk
 
 \*-------------------------------------------------------------------------*/
 
@@ -47,9 +46,9 @@ int main(int argc, char** argv)  {
 	imgExt(string(argv[1]));
 	std::string headerName(argv[2]);
 	if(headerName.size()<4 || headerName.compare(0,headerName.size(),"vxlImage.mhd") != 0)  usage();
-	
+
 	string wUmag;
-	if(argc>3)	
+	if(argc>3)
 	{
 		wUmag=string(argv[3]);
 		if(wUmag[0]=='U') std::cout<<"Writing Umag: "<<wUmag<<endl;
@@ -116,7 +115,7 @@ int main(int argc, char** argv)  {
 		Umg.writeBin("Umag"+writeFrmt);
 	}
 
-	if(writeFrmt!=imgExt()) 
+	if(writeFrmt!=imgExt())
 	{
 		voxelImageT<float> pField(n[0],n[1],n[2],0.);
 		pField.readBin("p"+imgExt());
@@ -131,5 +130,3 @@ int main(int argc, char** argv)  {
 
 	return 0;
 }
-
-
