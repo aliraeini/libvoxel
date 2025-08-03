@@ -1,3 +1,4 @@
+#pragma once
 /*-------------------------------------------------------------------------*\
 
 This file is part of libvoxel, a C++ template library for handelling 3D images.
@@ -13,9 +14,6 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 \*-------------------------------------------------------------------------*/
 
 
-#ifndef voxelRegions_H
-#define voxelRegions_H
-
 using namespace std;
 
 #define min7Nei(_vxls, vp_) \
@@ -28,12 +26,6 @@ using namespace std;
 		min(_vxls.v_i(-1,vp_),_vxls.v_i( 1,vp_)),\
 		min(_vxls.v_j(-1,vp_),_vxls.v_j( 1,vp_))))
 
-
-inline int recurseMin(const vector<int>& lblMap, int lbv)
-{
-	while(lblMap[lbv]<lbv) lbv=lblMap[lbv];
-	return lbv;
-}
 
 
 template<typename T>
@@ -140,6 +132,10 @@ voxelImageT<int> labelImage(const voxelImageT<T>& vImage, const T minvv=0, const
 		forAll_vp_(lbls)  if(*vp<bigN) *vp=min7Nei(lbls,vp);
 		forAllvp_(lbls)  if(*vp<bigN) *vp=min7Nei(lbls,vp);
 
+		const auto recurseMin = [](const vector<int>& lblMap, int lbv) {
+			while(lblMap[lbv]<lbv) lbv=lblMap[lbv];
+			return lbv;
+		};
 
 		///. compress
 		int mxl=0; sumlbl=0;
@@ -189,5 +185,3 @@ void keepLargest0(voxelImageT<T>& vImage, const T minvv=0, const T maxvv=0)  {
 	forAllvp_(lbls) if(*vp!=lrglbl)	{ const T vv=vImage(vp-lbl0);   if(minvv<=vv&& vv<=maxvv) vImage(vp-lbl0) = maxT(T)-1;	}//! isolated=254
 }
 
-
-#endif

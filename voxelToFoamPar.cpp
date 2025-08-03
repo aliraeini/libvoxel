@@ -1,5 +1,10 @@
 /*-------------------------------------------------------------------------*\
 
+This file is part of libvoxel, a C++ template library for handelling 3D images.
+
+Developed by:
+ - Ali Q Raeini (2009-2021)
+
 You can redistribute this code and/or modify this code under the
 terms of the GNU General Public License (GPL) as published by the
 Free Software Foundation, either version 3 of the License, or (at
@@ -8,14 +13,10 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 Please see our website for relavant literature making use of this code:
 https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-modelling/
 
-For further information please contact us by email:
-Ali Q Raeini: a.q.raeini@gmail.com
-
 \*-------------------------------------------------------------------------*/
 
 
 //!\brief Converts 3D Image files into openfoam format for computing flow fields.
-
 
 
 #include <fstream>
@@ -89,7 +90,6 @@ int main(int argc, char** argv)  {  //!- reads image, adds a boundary layers aro
 	cout <<"Converting to OpenFOAM format "<<endl;
 
 
-
 	//! solid phase should have the highest vv TODO: add multilabel
 	int nVVs=0;   forAllvv_seq(vimage) if(vv<240) nVVs =max(nVVs,int(vv));
 	cout<<" maxVxlvalue:"<<nVVs<<endl;
@@ -98,7 +98,7 @@ int main(int argc, char** argv)  {  //!- reads image, adds a boundary layers aro
 	cout<<"nVVs:"<<int(nVVs)<<endl;
 
 
-const int
+	const int \
 	Left  =nVVs+0,
 	Right =nVVs+1,
 	Bottom=nVVs+2,
@@ -170,7 +170,6 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	X0+=dx;
 
 
-
 	string Folder = myprocI>=0 ?  "processor"+_s(myprocI)  :  ".";
 	(cout<<"procIs, size: "+_s(procIsijk.size3())+",   ijk: "+_s(int3(iPrc,jPrc,kPrc))+"  >> "+Folder+"  N: "+_s(n)+"  X0: "+_s(X0)+"\n").flush();
 	mkdirs(Folder);	mkdirs(Folder+"/constant");
@@ -181,11 +180,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	voxelField<int> point_mapper(n.x+1,n.y+1,n.z+1,-1);
 
-
-
-
  {
-
 	int iPoints=-1;
 	forAllkji_1(vxlImg)
 		if (!vxlImg(i,j,k))  {
@@ -240,14 +235,13 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
  }
 	cout <<" :/"<<endl;
+
 //=======================================================================
-
-
 
 
 	size_t nCells=0;
 
-	const int
+	const int \
 	Internal     = 0,
 	Grainwalls   = 1,
 	Left  =nVVs+0,
@@ -336,11 +330,10 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	array<size_t,255> iStartFaces; iStartFaces.fill(0);
 
+	//=======================================================================
 
-
-
-
-	{	ofstream boundary((Folder+"/boundary"));
+	{ // write boundary / patches, collect iStartFaces
+		ofstream boundary((Folder+"/boundary"));
 		assert(boundary);
 		boundary<<
 		"FoamFile\n"
@@ -384,11 +377,6 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 		boundary<< nBoundaries <<endl	<<'('<<endl;
 
-
-
-
-
-
 		int iLastFace = nFaces[Internal];
 
 		//write_boundary(true, Grainwalls,"patch");
@@ -418,11 +406,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 		boundary.close();
 	}
 
-
-
-
-
-
+	//=======================================================================
 
 	cout<<"creating faces  "<<endl;
 
@@ -441,8 +425,8 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	cout<<"collecting faces  "<<endl;
 
 
-#define recordF_m( l10,l11,l20,l21,l30,l31,dir,ii,jj,kk,type )  {			\
-	if (ownerMapper(ii,jj,kk)[dir]<0)  {											 \
+	#define recordF_m( l10,l11,l20,l21,l30,l31,dir,ii,jj,kk,type )            \
+	{	if (ownerMapper(ii,jj,kk)[dir]<0) {                                      \
 		++iFaces[type] ;																		 \
 		ownerMapper(ii,jj,kk)[dir]=iFaces[type] + iStartFaces[type];	              \
 		faces_bs[type][iFaces[type]][4]=iCells;	/* cell number (for owners) */         \
@@ -452,10 +436,8 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 		faces_bs[type][iFaces[type]][3]=point_mapper(ii+l10,jj+l20,kk+l30);					\
 	}																			   \
 	else {																		   \
-		faces_bs[type][ownerMapper(ii,jj,kk)[dir]][5]=iCells; /* cell number (for neighbours) */ \
-	}																			   \
-  }
-
+			faces_bs[type][ownerMapper(ii,jj,kk)[dir]][5]=iCells; /*index of neighbour cell*/ \
+	}	}
 
 	#define  kclockwiseRecordF(type) recordF_m( 1,0,0,1,0,0, 2, ix-1,iy-1,iz-1, type)
 	#define kuclockwiseRecordF(type) recordF_m( 0,1,1,0,0,0, 2, ix-1,iy-1,iz  , type)
@@ -465,10 +447,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	#define iuclockwiseRecordF(type) recordF_m( 0,0,0,1,1,0, 0, ix  ,iy-1,iz-1, type)
 
 
-
-
 	int iCells=-1;
-
 
 	array<int,255> iFaces; iFaces.fill(-1);
 
@@ -527,11 +506,9 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	}
 
 
-
-
 	point_mapper.reset(0,0,0,0);
 
-
+	//=======================================================================
 
   {
 	ofstream faces(Folder+"/faces");	assert(faces);
@@ -594,11 +571,9 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 		"	class	   labelList;\n"
 		"	location	\""<<Folder+"\";\n"
 		"	object	  neighbour;\n"
-		"}\n\n"
-		<<nFaces[Internal]<<"\n("<<endl;
+		"}\n\n"<<nFaces[Internal]<<"\n("<<endl;
 	for (const auto& ff:faces_bs[Internal])  neighbour<<ff[5]<<"\n";
 	neighbour<<")"<<endl;
 
 	cout<<" :/ "<<endl;
-
 }

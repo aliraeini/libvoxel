@@ -619,7 +619,7 @@ class  voxelplugins {
 template<class InpT, typename T>  //! run voxel plugins
  int vxlProcess(const InpT& ins, voxelImageT<T>& img, string nam) {  return voxelplugins<T>().process(ins,img,nam);  }
 
-template<class InpT, typename First=uint8_t, typename... Rest>
+template<class InpT, typename First, typename... Rest>
  int vxlProcess(const InpT& ins, voxelImageTBase* imgPtr, string nam)  { //! detect type and run voxel plugins
 	if(auto img = dynamic_cast<voxelImageT<First>*>(imgPtr))
 		return vxlProcess<InpT,First>(ins,*img,nam);
@@ -677,9 +677,9 @@ void voxelImageT<T>::readFromHeader(const string& hdrNam, int procesKeys)  {
 
 	if (hdrNam.empty() || hdrNam=="NO_READ")  return;
 
-	std::ifstream hdrFile{hdrNam};  ensure(hdrFile,"Cannot open header file, "+hdrNam,-1);
+	std::ifstream fil{hdrNam};  ensure(fil,"Cannot open header file, "+hdrNam,-1);
 
-	auto& vImg=*this; string inputName;
+	auto& vImg=*this; string fnam;
 
 	int3 nnn(0,0,0);
 	string BinaryData="XXX", flipSigByt="False";
@@ -689,20 +689,20 @@ void voxelImageT<T>::readFromHeader(const string& hdrNam, int procesKeys)  {
 	if (hasExt(hdrNam,4,".mhd"))	{
 		(cout<<" "<<hdrNam<<": ").flush();
 		while (true)  {
-			std::streampos begLine = hdrFile.tellg();
-			string ky, tmp;   hdrFile>>ky>>tmp;
-			stringstream ss;  if(hdrFile.peek()!='\n') hdrFile.get (*(ss.rdbuf()));
-			if (hdrFile.fail()) break;
+			std::streampos begLine = fil.tellg();
+			string ky, tmp;   fil>>ky>>tmp;
+			stringstream ss;  if(fil.peek()!='\n') fil.get (*(ss.rdbuf()));
+			if (fil.fail()) break;
 			if (ky=="ObjectType")  {  ss>> tmp;  if (tmp != "Image") cout<<"  Warning: ObjectType != Image :="<<tmp<<endl;	}
 			else if (ky=="NDims")  {  ss>> tmp;  if (tmp != "3"    ) cout<<"  Warning: NDims != 3 :="<<tmp<<endl;	}
 			else if (ky=="ElementType")  { ss>> tmp;  if ((tmp != "MET_UCHAR") && (sizeof(T)==1)) cout<<"  Warning: ElementType != MET_UCHAR :="<<tmp<<endl; 	}
 			else if (ky=="Offset")       { ss>> vImg.X0_;   cout<<"  X0: "<<  vImg.X0_<<",  ";  X0read=true; }
 			else if (ky=="ElementSize" || ky=="ElementSpacing")  {  ss>> vImg.dx_;  cout<<"  dX: "<<vImg.dx_<<",  ";  dxread=true;	}
 			else if (ky=="DimSize")                              {  ss>> nnn;  nnn.z=std::min(nnn.z,maxNz);  cout<<"  Nxyz: "<<nnn<<",  ";	}
-			else if (ky=="ElementDataFile")  {  if (inputName.empty()) ss>> inputName;
+			else if (ky=="ElementDataFile")  {  if (fnam.empty()) ss>> fnam;
 				size_t is=hdrNam.find_last_of("\\/");
-				if (is<hdrNam.size() && inputName[0]!='/' &&  inputName[1]!=':') inputName=hdrNam.substr(0,is+1)+inputName;
-				cout<<"  Img: "<<inputName<<",	";
+				if (is<hdrNam.size() && fnam[0]!='/' &&  fnam[1]!=':') fnam=hdrNam.substr(0,is+1)+fnam;
+				cout<<"  Img: "<<fnam<<",	";
 			}
 			else if (ky=="BinaryData")  {  ss>> BinaryData;     cout<<"  BinaryData: "<<BinaryData<<"	"<<endl; }
 			else if (ky=="Unit")        {  ss>> unit_;  autoUnit=false;   cout<<"  Unit, OneMeter: "<<unit_<<endl; 	}
@@ -711,7 +711,7 @@ void voxelImageT<T>::readFromHeader(const string& hdrNam, int procesKeys)  {
 			else if (ky=="BinaryDataByteOrderMSB" || ky=="ElementByteOrderMSB")  {  ss>> flipSigByt; }
 			else if (ky!="CompressedData" &&  ky!="CompressedDataSize" &&  ky!="TransformMatrix" &&
 					 ky!="ElementNumberOfChannels" && ky!="CenterOfRotation" && ky!="AnatomicalOrientation" && ky!="AnatomicalOrientation")  {
-				hdrFile.clear();  hdrFile.seekg(begLine);
+				fil.clear();  fil.seekg(begLine);
 				(cout<<"; ").flush();
 				break;
 			}
@@ -723,7 +723,7 @@ void voxelImageT<T>::readFromHeader(const string& hdrNam, int procesKeys)  {
 	else if (hasExt(hdrNam,".tif"))  {  readTif(vImg, hdrNam);  return;  }
 	#endif
 	else if (hasExt(hdrNam,".am"))	{
-		inputName=hdrNam;
+		fnam=hdrNam;
 		procesKeys=0;
 	}
 	else if (hasExt(hdrNam,7,".raw.gz") || hasExt(hdrNam,4,".raw") || hasExt(hdrNam,4,".dat"))  { // detect size and voxel size from image name.
@@ -745,45 +745,45 @@ void voxelImageT<T>::readFromHeader(const string& hdrNam, int procesKeys)  {
 		cout<<" (depricated) _header:"<<hdrNam<<","<<endl;
 
 		char tmpc;
-		for (int i=0; i<8; ++i)   hdrFile>>tmpc, cout<<tmpc;  //ignore the first 8 characters (ascii 3uc)
+		for (int i=0; i<8; ++i)   fil>>tmpc, cout<<tmpc;  //ignore the first 8 characters (ascii 3uc)
 
-		if (hasExt(hdrNam,7,"_header"))  inputName=hdrNam.substr(0,hdrNam.size()-7);
-		hdrFile>>nnn >> vImg.dx_ >>	vImg.X0_ ;
+		if (hasExt(hdrNam,7,"_header"))  fnam=hdrNam.substr(0,hdrNam.size()-7);
+		fil>>nnn >> vImg.dx_ >>	vImg.X0_ ;
 		cout<<"\n Nxyz: "<<nnn<<"    dX: "<< vImg.dx_<<"   X0: "<< vImg.X0_ <<" um"<< endl;
-		if (!hdrFile)	 { cout<<"   Incomplete/bad header name. Aborting"<<endl; exit(-1); }
+		if (!fil)	 { cout<<"   Incomplete/bad header name. Aborting"<<endl; exit(-1); }
 	}
 	else  alert("Unknown (header) file type: "+hdrNam,-1); // exit
 
 	if(nnn.z) vImg.reset(nnn);
 	int readingImage=0;
-	if( !inputName.empty() && inputName!="NO_READ" && procesKeys!=2)  {
-	  if (hasExt(inputName,4,".tif"))  {
+	if( !fnam.empty() && fnam!="NO_READ" && procesKeys!=2)  {
+	  if (hasExt(fnam,4,".tif"))  {
 			dbl3 dx=vImg.dx_, X0=vImg.X0_;
-			readingImage = vImg.readBin(inputName);
+			readingImage = vImg.readBin(fnam);
 			if(X0read) vImg.X0_=X0;
 			if(dxread) vImg.dx_=dx;
 	  }
-	  else if ((hasExt(inputName,4,".raw") && BinaryData!="False") || BinaryData=="True")   {
-			readingImage = vImg.readBin(inputName, nSkipBytes);
+	  else if ((hasExt(fnam,4,".raw") && BinaryData!="False") || BinaryData=="True")   {
+			readingImage = vImg.readBin(fnam, nSkipBytes);
 	  }
-	  else if (hasExt(inputName,3,".am"))    {
+	  else if (hasExt(fnam,3,".am"))    {
 			int RLECompressed;
 			dbl3 dx=vImg.dx_, X0=vImg.X0_;
-			getAmiraHeaderSize(inputName, nnn,vImg.dx_,vImg.X0_,nSkipBytes,RLECompressed);
-			readingImage = vImg.readBin(inputName, nSkipBytes);
+			getAmiraHeaderSize(fnam, nnn,vImg.dx_,vImg.X0_,nSkipBytes,RLECompressed);
+			readingImage = vImg.readBin(fnam, nSkipBytes);
 			if(X0read) vImg.X0_=X0;
 			if(dxread) vImg.dx_=dx;
 	  }
-	  else if (hasExt(inputName,7,".raw.gz"))   {
-			readingImage = vImg.readBin(inputName);
+	  else if (hasExt(fnam,7,".raw.gz"))   {
+			readingImage = vImg.readBin(fnam);
 	  }
 	  else   {
-		std::ifstream in(inputName);  assert(in);
+		std::ifstream in(fnam);  assert(in);
 		if(nSkipBytes) in.ignore(nSkipBytes);
 		vImg.voxelField<T>::readAscii(in);
 	  }
 	}
-	ensure(readingImage==0, "cannot read image "+inputName,-1);
+	ensure(readingImage==0, "cannot read image "+fnam,-1);
 
 	if(flipSigByt=="True") {
 		cout<<"  flipEndian "<<endl;
@@ -798,22 +798,9 @@ void voxelImageT<T>::readFromHeader(const string& hdrNam, int procesKeys)  {
 	if(abs(unit_-1.)>epsT(float)) cout<<"  unit= "<<unit_<<" => dx= "<<vImg.dx_<<", X0= "<<vImg.X0_<<endl;
 
 
-	if (procesKeys) voxelplugins<T>().process(InputFile(hdrFile,hdrNam),vImg);
+	if (procesKeys) voxelplugins<T>().process(InputFile(fil,hdrNam),vImg);
 
 }
-
-
-
-
-//template void voxelImageT<unsigned char>::readFromHeader(istream&,	const string&, int );
-//template void voxelImageT<unsigned short>::readFromHeader(istream&,	const string&, int );
-//template void voxelImageT<int>::readFromHeader(istream&,	const string&, int );
-//template void voxelImageT<float>::readFromHeader(istream&,	const string&, int );
-//template void voxelImageT<double>::readFromHeader(istream&,	const string&, int );
-//template void voxelImageT<float3>::readFromHeader(istream&,	const string&, int );
-
-
-
 
 
 
@@ -839,22 +826,22 @@ std::unique_ptr<voxelImageTBase> readImage(string hdrNam,	int procesKeys)  {
 	#endif
 
 	string typ;
-	std::ifstream hdrFile(hdrNam); // header file
-	if(!hdrFile)
+	std::ifstream fil(hdrNam); // header file
+	if(!fil)
 	{
 		ensure(hdrNam.size()<4 || hdrNam[hdrNam.size()-4]!='.', "can not open header file '"+hdrNam+"', pwd: "+getpwd(), -1);
 		typ = hdrNam; hdrNam="NO_READ";
 	}
 	else if (hasExt(hdrNam,4,".mhd"))  {
 		while (true)  {
-			string ky;  hdrFile>>ky;
+			string ky;  fil>>ky;
 			stringstream ss;
-			if(hdrFile.peek()!='\n') hdrFile.get (*(ss.rdbuf()));
-			if (hdrFile.fail()) {  cout<<"\n\n\nWarning: readImage, 'ElementType =' not set in "<<hdrNam<<endl; break; }
+			if(fil.peek()!='\n') fil.get (*(ss.rdbuf()));
+			if (fil.fail()) {  cout<<"\n\n\nWarning: readImage, 'ElementType =' not set in "<<hdrNam<<endl; break; }
 			if (ky == "ElementType")  {  ss >> typ >> typ;  break; }
 		}
 	}
-	hdrFile.close();
+	fil.close();
 
 	if (typ=="MET_UCHAR")        return make_unique<voxelImageT<unsigned char>>(hdrNam, procesKeys);
 	if (typ=="MET_CHAR")         return make_unique<voxelImageT<char>>          (hdrNam, procesKeys);

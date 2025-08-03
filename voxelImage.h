@@ -1,3 +1,4 @@
+#pragma once
 /*-------------------------------------------------------------------------*\
 
 This file is part of libvoxel, a C++ template library for handelling 3D images.
@@ -13,8 +14,15 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 \*-------------------------------------------------------------------------*/
 
 
-#ifndef voxelImageT_H
-#define voxelImageT_H
+#ifdef _ExtraVxlTypes
+#  define SupportedVoxTyps  unsigned char,unsigned short,int,float,short,unsigned int,double,float3,dbl3
+#else
+#  ifdef _VoxBasic8
+#    define SupportedVoxTyps  unsigned char
+#  else
+#    define SupportedVoxTyps  unsigned char,unsigned short,int,float
+#  endif
+#endif //_ExtraVxlTypes
 
 #include <fstream>
 #include <iostream>
@@ -29,15 +37,14 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 #include <unordered_map>
 #include <functional>
 
-
 #include "typses.h"
+
 #ifdef _STOR_PUB
 #include "SiRun.h" //_STOR
 #endif //_STOR_PUB
 
 //! suffix,  set/get default suffix, uses static storage.
-inline const std::string& imgExt(const std::string& defSuffix="")
-{
+inline const std::string& imgExt(const std::string& defSuffix="") {
 	#ifdef ZLIB
   	   static std::string defSuffix_=".raw.gz";
 	#else
@@ -63,7 +70,7 @@ inline const std::string& imgExt(const std::string& defSuffix="")
 
 template<typename T>
 using intOr = typename std::conditional<(sizeof(T) > sizeof(short)),T,int>::type;
-#define Tint  intOr<T>
+#define Tint  intOr<T> // cast to int or larger type
 
 extern int maxNz;
 
@@ -78,7 +85,7 @@ class voxelField {
 
 
 	voxelField(): nij_(0), nnn_(0,0,0) {}
-	voxelField(int3 n) {  reset(n);  }
+	voxelField(int3 n)          {  reset(n);  }
 	voxelField(int3 n, T value) {  reset(n, value);  }
 	voxelField(int n1, int n2, int n3, T value) {  reset(int3(n1,n2,n3), value);  }
 	virtual ~voxelField() {}
@@ -109,7 +116,6 @@ class voxelField {
 	void setFrom(const voxelField<T>&Values, int n1, int n2, int n3);
 
 
-
 	const T& operator()(int i, int j, size_t k) const { return data_[k*nij_+j*nnn_.x+i]; }
 	      T& operator()(int i, int j, size_t k)       { return data_[k*nij_+j*nnn_.x+i]; }
 	      T& operator()(long long ii, size_t k){ return data_[k*nij_+ii]; }
@@ -129,9 +135,10 @@ class voxelField {
 	size_t   I_k(int k, size_t iii)      const { return (iii+k*nij_); }
 	size_t index(int i, int j, size_t k) const { return k*nij_+j*nnn_.x+i; }
 
-	T*       begin()          { return &*data_.begin();  }
+	T*       data()           { return data_.data(); }
+	T*       begin()          { return data_.data();  }
 	T*       end()            { return &*data_.end();    }
-	const T* cbegin()   const { return &*data_.cbegin(); }
+	const T* cbegin()   const { return data_.data(); }
 	const T* cend()     const { return &*data_.cend();   }
 	const T& back()     const { return data_.back();     }
 
@@ -146,7 +153,7 @@ class voxelField {
 
 
 
-//! Base class handling different image files with different data types (float, char, int...)
+//! Base class handling image files with different runtime-time data types (float, uchar, int...)
 class voxelImageTBase {
  public:
 	virtual ~voxelImageTBase() {}
@@ -159,13 +166,12 @@ class voxelImageTBase {
 };
 
 
-//!  3D image data of different types (T = float, char, int...)
+//!  3D image data of different compile-time data types (T = float, uchar, int...)
 template <typename T>
-class voxelImageT: public voxelImageTBase, public voxelField<T>  { //!  3D image data of different types (T = float, char, int...)
+class voxelImageT: public voxelImageTBase, public voxelField<T>  {
 
 	dbl3	X0_;   //!< origin
 	dbl3	dx_;   //!< voxel size
-	//string bname_; //!< base name, optional
 
  public:
 
@@ -187,8 +193,7 @@ class voxelImageT: public voxelImageTBase, public voxelField<T>  { //!  3D image
 
 	std::unique_ptr<voxelImageTBase> copy() const { return std::make_unique<voxelImageT<T>>(*this); }
 
-
-	void cropD( int3 frm,  int3 to,int emptylyrs=0, T eLyrsValue=1, bool verbose=false) ;
+	void cropD(int3 frm,  int3 to,int emptylyrs=0, T eLyrsValue=1, bool verbose=false) ;
 
 	void writeHeader(std::string fileName) const;
 	void writeHeader(std::string fileName, int3 iBgn, int3 iEnd) const { voxelField<T>::writeHeader(fileName,iBgn,iEnd,dx_,X0_); }
@@ -199,7 +204,6 @@ class voxelImageT: public voxelImageTBase, public voxelField<T>  { //!  3D image
 	void rotate(char direction);
 	void PointMedian032(int nAdj0, int nAdj1, T lbl0, T lbl1);
 	size_t FaceMedian06(int nAdj0,int nAdj1); // obsolete
-	//void mode(short nNeist, bool verbose=false);// now standalone function
 	void zeroGrad(int nlyr);
 
 	void AND(const voxelImageT& data2);
@@ -208,7 +212,6 @@ class voxelImageT: public voxelImageTBase, public voxelField<T>  { //!  3D image
 	void XOR(const voxelImageT& data2);
 	void maxEq(const voxelImageT& data2);
 	void minEq(const voxelImageT& data2);
-
 
 	void fillHoles(int maxHoleRadius);
 
@@ -219,13 +222,13 @@ class voxelImageT: public voxelImageTBase, public voxelField<T>  { //!  3D image
    void threshold101(T theresholdMin,T theresholdMax);
 
 	void writeAConnectedPoreVoxel(std::string fileName) const;
-	template<typename T2> void resetFrom(const voxelImageT<T2>&Values);
+	template<typename T2> void resetFrom(const voxelImageT<T2>&Values); // See also: readConvertFromHeader resetFromImageT
 	void setFrom(const voxelImageT<T>&Values, int n1, int n2, int n3);
 	void growBox(int nlyr);
 	void shrinkBox(int nlyr) {  int3 bgn(nlyr,nlyr,nlyr);  cropD(bgn,this->size3()-bgn);  }
 
 	double volFraction(T vv1,T vv2) const;
-	void printInfo() const;
+	void   printInfo() const;
 
 	const dbl3& X0  ()  const { return X0_; }
 	dbl3&       X0Ch()        { return X0_; }
@@ -247,27 +250,14 @@ class voxelImageT: public voxelImageTBase, public voxelField<T>  { //!  3D image
 	}
 };
 
-// standalone functions TODO: uncomment
-//template<typename T> void copy(const voxelImageT<T>& img2, int3 frm,  int3 to, voxelImageT<T>& img, int3 at)
-//template<typename T> void mapToFrom(voxelImageT<T>& vImage, const voxelImageT<T>& vimage2);
-//template<typename T> void mapToFrom(voxelImageT<T>& vImage, const voxelImageT<T>& vimage2, T vmin, T vmax, double scale=0, T shift=0)
-//template<typename T> void maskWriteFraction(voxelImageT<T>& vImage, std::string maskname, std::string fnam, unsigned char maskvv, T minIelm, T maxIelm)//  TODO to be tested
-//template<typename T> void circleOut(voxelImageT<T>& vImage, int X0,int Y0,int R, char dir = 'z', T outVal=std::numeric_limits<T>::max())//  TODO to be tested
-//template<typename T> voxelImageT<T> median(const voxelImageT<T>& vImage)
-//template<typename T> void replaceRange(voxelImageT<T>& vImage, T minvi, T  maxvi, T midvi)
-//template<typename T> void rescale(voxelImageT<T>& img, T theresholdMin,T  theresholdMax)
-//template<typename T> long long modeNSames(voxelImageT<T>& vImage, const short nSameNei, bool verbose=false)
-//template<typename T> void FaceMedGrowToFrom(voxelImageT<T>& vImg, T lbl0, T lbl1, int ndif=0)
-//template<typename T> voxelImageT<T> resampleMax(const voxelImageT<T>& img, double nReSampleNotSafe)//  TODO to be tested
-//template<typename T> voxelImageT<T>  resampleMode(const voxelImageT<T>& img, double nReSampleNotSafe)//  TODO to be tested
-//template<typename T> voxelImageT<T>  resliceZ(const voxelImageT<T>& img, double nReSampleNotSafe)//  TODO to be tested
-//template<typename T> voxelImageT<T>  resampleMean(const voxelImageT<T>& img, double nReSampleNotSafe)//  TODO to be tested
-//template<typename T> voxelImageT<T> growBounds(const voxelImageT<T>& vxls, int nLayers)
 
 template<typename T> void mode26(voxelImageT<T>& vImg, short minDif, bool verbose=false);
 
 std::string VxlKeysHelp(std::string keyname="", std::string subkey="");
 
+
+template <typename T> using VxlFunc  = bool(*)(std::stringstream&, voxelImageT<T>&);
+template <typename T> using VxlFuncs = std::unordered_map<std::string, VxlFunc<T>>;
 
 template<class InpT, typename T>
 int vxlProcess(const InpT& inks, voxelImageT<T>& img, std::string nam="");// InpT= string or InputFile
@@ -279,8 +269,8 @@ int vxlProcess(const InpT& inks, voxelImageTBase* ptr, std::string nam="");
 std::unique_ptr<voxelImageTBase> readImage(std::string hdrNam /*headername or image type*/, int procesKeys = 1 );
 
 template<class T, typename First=uint8_t, typename... Rest>
-int resetFromImageT(voxelImageT<T>& vImg, voxelImageTBase* imgPtr) { //! cast to specified vImg type
-	if(auto img = dynamic_cast<voxelImageT<First>*>(imgPtr)) { vImg.resetFrom(*img); return 0; }
+int resetFromImageT(voxelImageT<T>& vImg, const voxelImageTBase* imgPtr) { //! cast to specified vImg type
+	if(auto img = dynamic_cast<const voxelImageT<First>*>(imgPtr)) { vImg.resetFrom(*img); return 0; }
 	else if(sizeof...(Rest)) return resetFromImageT<T,Rest...>(vImg, imgPtr);
 	alert("Unknown image type in resetFromImageT");
 	return -1;
@@ -294,13 +284,15 @@ void readConvertFromHeader( voxelImageT<T>& vImg, std::string hdrNam, int proces
 	else  ensure(  resetFromImageT(vImg, imgPtr)==0, "can not convert image", -1);
 }
 
-template<class T> voxelImageT<T>* vxlCast(voxelImageTBase* imgPtr) { return dynamic_cast<voxelImageT<T>*>(imgPtr); }
+template<class T> voxelImageT<T>*
+vxlCast(void* imgPtr) { return dynamic_cast<voxelImageT<T>*>(static_cast<voxelImageTBase*>(imgPtr)); }
+
 
 template<typename T>
 voxelImageT<T> copyOrReadImgT(std::string hdrNam) {
 	#ifdef _STOR_PUB
 	if (void* ptr = dbget(_STOR,hdrNam,0)) {
-		auto imgPtr = vxlCast<T>(static_cast<voxelImageTBase*>(ptr)); ensure(imgPtr, "wrong image type", -1);
+		auto imgPtr = vxlCast<T>(ptr); ensure(imgPtr, "wrong image type", -1);
 		return *imgPtr;
 	}
 	else
@@ -309,26 +301,23 @@ voxelImageT<T> copyOrReadImgT(std::string hdrNam) {
 }
 
 #ifdef _STOR_PUB
-	#define _dbgetOrReadImgT(_img,_hdrNam)  \
-			voxelImageT<T>* _imgPtr;   std::unique_ptr<voxelImageTBase> _imgRead;  \
-			if (void* ptr = dbget(_STOR,_hdrNam,0)) { _imgPtr = vxlCast<T>(static_cast<voxelImageTBase*>(ptr)); }  \
-			else       { _imgRead = readImage(_hdrNam,1); _imgPtr=vxlCast<T>(_imgRead.get()); }  \
-			ensure(_imgPtr, "wrong image type", -1);  \
-			const voxelImageT<T>& _img = *_imgPtr;
+	#define _dbgetOrReadImg(_T,_img,_hdrNam)  \
+			voxelImageT<_T>* _img##Ptr;   std::unique_ptr<voxelImageTBase> _img##Read;  \
+			if (void* ptr = dbget(_STOR,_hdrNam,0)) { _img##Ptr = vxlCast<_T>(ptr); }  \
+			else       { _img##Read = readImage(_hdrNam,1); _img##Ptr=vxlCast<_T>(_img##Read.get()); }  \
+			ensure(_img##Ptr, "wrong image type", -1);  \
+			const voxelImageT<_T>& _img = *_img##Ptr;
 #else
-	#define _dbgetOrReadImgT(_img,_hdrNam) voxelImageT<T> _img(_hdrNam)
+	#define _dbgetOrReadImg(_T, _img,_hdrNam) voxelImageT<_T> _img(_hdrNam)
 #endif
 
 typedef voxelImageT<unsigned char> voxelImage;   //! default image type
 
-#endif
+
 
 #ifndef voxelImageMacros_H
 #define voxelImageMacros_H
 
-
-template<typename T>
-class mapComparer  {  public: bool operator() (std::pair<const T,short>& i1, std::pair<const T,short> i2) {return i1.second<i2.second;}  };
 
 
 #define forAlliii_(_vxls)   OMPFor()	\

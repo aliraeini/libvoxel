@@ -20,7 +20,8 @@ which solely acts as an interface to libvoxel, can be used to run basic image pr
 
 See [../script/README.md](../script/README.md) for build instructions.
 
-The library is not currently compiled into binary format. It meant to be header only, but to reduce compile time the heavy parts are seperated in the voxelImage.cpp file which is compiled and linked statistically to other executables.
+The library is not currently compiled into binary format.
+It meant to be header only, but to reduce compile time the heavy parts are seperated in the voxelImage.cpp file which is compiled and linked statistically to other executables.
 
 The voxelImageProcess utility is pre-compiled into a Win64 executable in pnextract and pnflow codes, in [../../bin.7z](../../bin.7z).
 

@@ -5,11 +5,6 @@ if not ("msRoot" in os.environ):
 from msrc  import *
 
 
-
-
-
-
-
 nErrs=0
 
 with open("voxcylinder.mhd", 'w') as f1:
@@ -23,6 +18,9 @@ with open("voxcylinder.mhd", 'w') as f1:
 
 runSh('.', "voxelImageProcess voxcylinder.mhd voxcylinder.tif");
 runSh('.', "voxelImageProcess voxcylinder.tif voxcylinder.mhd");
-if fileFloatDiffersFrom("voxelImageProcess.log","totalPorosity:",math.pi*5*5/(20*20),0.05): nErrs+=1
+totalPorosity = math.pi*5*5/(20*20)
+if fileFloatDiffersFrom("voxelImageProcess.log","total_porosity:", totalPorosity, 0.05):
+ if fileFloatDiffersFrom("voxelImageProcess.log","totalPorosity:", totalPorosity, 0.05): # TODO: remove cross-compatibility
+    nErrs+=1
 
 exit(nErrs)
