@@ -1,9 +1,10 @@
 
-srcs :=   Ufraw2Uc.cpp   voxelToFoamPar.cpp  voxelToFoam.cpp
-srcs += voxelImageProcess.cpp
+mains :=   Ufraw2Uc.cpp   voxelToFoamPar.cpp  voxelToFoam.cpp
+mains += voxelImageProcess.cpp
+
 tsts := test.py
-all: $(srcs)
-$(info srcs: $(srcs),   tsts: $(tsts) )
+all: $(mains)
+$(info mains: $(mains),   tsts: $(tsts) )
 
 
 #ifneq ("${OPT}", ".exe")
