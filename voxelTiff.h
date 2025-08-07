@@ -15,16 +15,16 @@
 
 template<typename T>
 int tifDataType(T) {
-   const std::unordered_map<std::type_index, int> tifTypes
+	const std::unordered_map<std::type_index, int> tifTypes
 	{
-    {std::type_index(typeid(unsigned char)), SAMPLEFORMAT_UINT},
-    {std::type_index(typeid(char)),          SAMPLEFORMAT_INT},
-    {std::type_index(typeid(int)),           SAMPLEFORMAT_INT},
-    {std::type_index(typeid(unsigned int)),  SAMPLEFORMAT_UINT},
-    {std::type_index(typeid(short)),         SAMPLEFORMAT_INT},
-    {std::type_index(typeid(unsigned short)), SAMPLEFORMAT_UINT},
-    {std::type_index(typeid(float)),         SAMPLEFORMAT_IEEEFP},
-    {std::type_index(typeid(double)),        SAMPLEFORMAT_IEEEFP},
+		{std::type_index(typeid(unsigned char)), SAMPLEFORMAT_UINT},
+		{std::type_index(typeid(char)),          SAMPLEFORMAT_INT},
+		{std::type_index(typeid(int)),           SAMPLEFORMAT_INT},
+		{std::type_index(typeid(unsigned int)),  SAMPLEFORMAT_UINT},
+		{std::type_index(typeid(short)),         SAMPLEFORMAT_INT},
+		{std::type_index(typeid(unsigned short)), SAMPLEFORMAT_UINT},
+		{std::type_index(typeid(float)),         SAMPLEFORMAT_IEEEFP},
+		{std::type_index(typeid(double)),        SAMPLEFORMAT_IEEEFP},
 	};
 	return tifTypes.at(std::type_index(typeid(T)));
 }
@@ -47,7 +47,7 @@ inline void getTifTags(dbl3& X0_, dbl3& dx_, TIFF *tif) {
 	X0_={X0,Y0,Z0};
 
 	char * info;
-	if(TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &info))  {
+	if(TIFFGetField(tif, TIFFTAG_IMAGEDESCRIPTION, &info)) {
 		std::istringstream instrim(info);
 		while(instrim.good())  {
 			std::string str;
@@ -89,7 +89,7 @@ int readTif( voxelField<T>&  aa, std::string fnam )
 	TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &nx);
 	TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &ny);
 	int npages=TIFFNumberOfDirectories(tif);
-	npages=std::min(npages,maxNz);
+	if (npages>1.1*maxNz+2)  npages = maxNz;
 
 	(std::cout<<"size: "<<aa.size3()<<" * "<<sizeof(T)).flush();
 	if (voxelImageT<T>* vxls = dynamic_cast<voxelImageT<T>*>(&aa)) {
@@ -99,7 +99,7 @@ int readTif( voxelField<T>&  aa, std::string fnam )
 	aa.reset(nx,ny,npages,T(0.));
 
 
-	for(int pn=0;pn<npages;++pn) {
+	for (int pn=0;pn<npages;++pn) {
 		TIFFReadEncodedStrip( tif, static_cast<tstrip_t>(0), static_cast<void *>(&aa(0,0,pn)), static_cast<tsize_t>(nx * ny) * sizeof(T) );
 		//for (row = 0; row < ny; row++) {		if (TIFFReadScanline(tif, &aa(0,row,pn), row, 0) < 0)		break;	}
 		TIFFReadDirectory(tif);
@@ -116,7 +116,7 @@ int writeTif(const voxelField<T>&  aa, std::string fnam) {
 
 	uint32_t nx=aa.nx(), ny=aa.ny();
 	int pn=0, npages=aa.nz();
-	int smplfrmt	 = tifDataType(T());
+	int smplfrmt = tifDataType(T());
 
 	TIFF * tif = (TIFF *) NULL;
 	tif = TIFFOpen(fnam.c_str(), "w8");		if (tif == NULL)	return -2;
@@ -125,7 +125,7 @@ int writeTif(const voxelField<T>&  aa, std::string fnam) {
 	if(vxls) setTifTags(vxls->X0(),vxls->dx(),tif);
 	else std::cout<<"dxXo not set"<<std::endl;
 
-   for(pn=0;pn<npages;++pn) {
+	for(pn=0; pn<npages; ++pn) {
 
 		TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, nx);
 		TIFFSetField(tif, TIFFTAG_IMAGELENGTH, ny);
@@ -142,11 +142,11 @@ int writeTif(const voxelField<T>&  aa, std::string fnam) {
 		TIFFSetField(tif, TIFFTAG_PAGENUMBER, pn, npages);
 
 		T aOrig=aa(nx/2,ny/2,pn);  // Warn if image modified in libtiff
-		TIFFWriteEncodedStrip( tif, 0, const_cast<T *>(&aa(0,0,pn)), nx * ny * sizeof(T) );
+		TIFFWriteEncodedStrip(tif, 0, const_cast<T *>(&aa(0,0,pn)), nx*ny*sizeof(T));
 		if(aOrig!=aa(nx/2,ny/2,pn)) std::cout<<"Warning image modified in libtiff"<<std::endl;
 
 		TIFFWriteDirectory(tif);
-  }
+	}
 
 	TIFFClose(tif);
 	return (0);
@@ -159,8 +159,8 @@ int writeTif(const voxelField<T>&  aa, std::string fnam, int iStart,int iEnd , i
 	voxelImageT<T>  bb;
 	bb.reset({iEnd-iStart, jEnd-jStart, kEnd-kStart});
 	const voxelImageT<T>* vxls = dynamic_cast<const voxelImageT<T>*>(&aa);
-	if(vxls) 	bb.setFrom(*vxls, iStart, jStart, kStart);
-	else     	bb.voxelField<T>::setFrom(aa, iStart, jStart, kStart);
+	if(vxls) bb.setFrom(*vxls, iStart, jStart, kStart);
+	else     bb.voxelField<T>::setFrom(aa, iStart, jStart, kStart);
 
 	return writeTif(bb, fnam);
 
@@ -168,10 +168,10 @@ int writeTif(const voxelField<T>&  aa, std::string fnam, int iStart,int iEnd , i
 	// Note although the deflate compression algorithm overall is a better choice,
 	// for now we have to stick to LZW for portability
 	// (specifically because Avizo does not support inflate algorithm).
-		}
+}
 
 
-inline std::unique_ptr<voxelImageTBase>  readTif(std::string fnam)  {
+inline std::unique_ptr<voxelImageTBase>  readTif(std::string fnam) {
 	TIFF *tif = (TIFF *) NULL;
 	tif = TIFFOpen(fnam.c_str(), "r");
 	if (tif == NULL)  return std::unique_ptr<voxelImageTBase>();
@@ -188,7 +188,7 @@ inline std::unique_ptr<voxelImageTBase>  readTif(std::string fnam)  {
 	#ifndef _VoxBasic8
 			if (nbits==16) return std::make_unique<voxelImageT<unsigned short>>(fnam);
 #ifdef _ExtraVxlTypes
-		  if     (nbits==32) return std::make_unique<voxelImageT<unsigned int>>(fnam);
+			if (nbits==32) return std::make_unique<voxelImageT<unsigned int>>(fnam);
 #endif
 		  break;
 		case SAMPLEFORMAT_INT:
@@ -196,13 +196,13 @@ inline std::unique_ptr<voxelImageTBase>  readTif(std::string fnam)  {
 			if (nbits==16) return std::make_unique<voxelImageT<short>>(fnam);
 			if (nbits==8)  return std::make_unique<voxelImageT<char>>(fnam);
 #endif
-		  if   (nbits==32)    return std::make_unique<voxelImageT<int>>(fnam);
+			if (nbits==32) return std::make_unique<voxelImageT<int>>(fnam);
 		  break;
 		case SAMPLEFORMAT_IEEEFP:
 #ifdef _ExtraVxlTypes
 			if (nbits==64) return std::make_unique<voxelImageT<double>>(fnam);
 #endif
-		  if   (nbits==32)    return std::make_unique<voxelImageT<float>>(fnam);
+			if (nbits==32) return std::make_unique<voxelImageT<float>>(fnam);
 			break;
 	#endif
 		}

@@ -16,7 +16,7 @@ https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-mod
 \*-------------------------------------------------------------------------*/
 
 
-//!\brief Converts 3D Image files into openfoam format for computing flow fields.
+//! \brief Converts 3D Image files into openfoam format for computing flow fields.
 
 
 #include <fstream>
@@ -204,7 +204,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	cout<<"writing  points; nPoints: "+_s(iPoints+1)+";\n";cout.flush();
 
 
-	ofstream pointsf(Folder+"/points");   assert(pointsf);
+	ofstream pointsf(Folder+"/points");  assert(pointsf);
 
 	pointsf<<
 		"FoamFile\n"
@@ -218,12 +218,12 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	pointsf<<iPoints+1<<"\n("<<endl;
 	pointsf.precision(8);
-	iPoints=-1;
-	for (int iz=0;iz<point_mapper.nz();++iz)  {	double z=iz*dx[2]+X0[2];
-		for (int iy=0;iy<point_mapper.ny();iy++)  {	double y=iy*dx[1]+X0[1];
-			for (int ix=0;ix<point_mapper.nx();ix++)  {
+	iPoints = -1;
+	for (int iz=0; iz<point_mapper.nz(); ++iz)  {	double z=iz*dx[2]+X0[2];
+		for (int iy=0; iy<point_mapper.ny(); iy++)  {	double y=iy*dx[1]+X0[1];
+			for (int ix=0; ix<point_mapper.nx(); ix++)  {
 				if(point_mapper(ix,iy,iz)>=0)  {
-					point_mapper(ix,iy,iz)=++iPoints;//. sort point_mapper
+					point_mapper(ix,iy,iz) = ++iPoints; //. sort point_mapper
 					double x=ix*dx[0]+X0[0];
 					pointsf<< "("<<x<< ' '<<y<<' '<<z<<")\n";
 				}
@@ -236,7 +236,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
  }
 	cout <<" :/"<<endl;
 
-//=======================================================================
+	//=======================================================================
 
 
 	size_t nCells=0;
@@ -267,53 +267,53 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	array<size_t,255> nFaces; nFaces.fill(0);
 
 
-	for (int iz=1;iz<=n.z;++iz)
-	 for (int iy=1;iy<=n.y;++iy)
-	  for (int ix=1;ix<=n.x;++ix)
-		if (!vxlImg(ix,iy,iz))  {
-			nCells++;
+	for (int iz=1; iz<=n.z; ++iz)
+	 for (int iy=1; iy<=n.y; ++iy)
+	  for (int ix=1; ix<=n.x; ++ix)
+			if (!vxlImg(ix,iy,iz))  {
+				nCells++;
 
-			unsigned char
-			neiv=vxlImg(ix-1,iy,iz);
-			if (ix!=1)  {
-			  if (neiv)     ++nFaces[neiv]; }
-			else if (neiv)  ++nFaces[neiv];
-			else            ++nFaces[Left];
+				unsigned char
+				neiv=vxlImg(ix-1,iy,iz);
+				if (ix!=1)  {
+					if (neiv)     ++nFaces[neiv]; }
+				else if (neiv)  ++nFaces[neiv];
+				else            ++nFaces[Left];
 
-			neiv=vxlImg(ix+1,iy,iz);
-			if (ix!=n.x)  {
-			  if (neiv)     ++nFaces[neiv];
-			  else          ++nFaces[Internal]; }
-			else if (neiv)  ++nFaces[neiv];
-			else            ++nFaces[Right];
+				neiv=vxlImg(ix+1,iy,iz);
+				if (ix!=n.x)  {
+					if (neiv)     ++nFaces[neiv];
+					else          ++nFaces[Internal]; }
+				else if (neiv)  ++nFaces[neiv];
+				else            ++nFaces[Right];
 
-			neiv=vxlImg(ix,iy-1,iz);
-			if (iy!=1)  {
-			  if (neiv)     ++nFaces[neiv]; }
-			else if (neiv)  ++nFaces[neiv];
-			else            ++nFaces[Bottom];
+				neiv=vxlImg(ix,iy-1,iz);
+				if (iy!=1)  {
+					if (neiv)     ++nFaces[neiv]; }
+				else if (neiv)  ++nFaces[neiv];
+				else            ++nFaces[Bottom];
 
-			neiv=vxlImg(ix,iy+1,iz);
-			if (iy!=n.y)  {
-			  if (neiv)     ++nFaces[neiv];
-			  else          ++nFaces[Internal]; }
-			else if (neiv)  ++nFaces[neiv];
-			else            ++nFaces[Top];
+				neiv=vxlImg(ix,iy+1,iz);
+				if (iy!=n.y)  {
+					if (neiv)     ++nFaces[neiv];
+					else          ++nFaces[Internal]; }
+				else if (neiv)  ++nFaces[neiv];
+				else            ++nFaces[Top];
 
 
-			neiv=vxlImg(ix,iy,iz-1);
-			if (iz!=1)  {
-			  if (neiv)     ++nFaces[neiv]; }
-			else if (neiv)  ++nFaces[neiv];
-			else            ++nFaces[Back];
+				neiv=vxlImg(ix,iy,iz-1);
+				if (iz!=1)  {
+					if (neiv)     ++nFaces[neiv]; }
+				else if (neiv)  ++nFaces[neiv];
+				else            ++nFaces[Back];
 
-			neiv=vxlImg(ix,iy,iz+1);
-			if (iz!=n.z)  {
-			  if (neiv)     ++nFaces[neiv];
-			  else          ++nFaces[Internal]; }
-			else if (neiv)  ++nFaces[neiv];
-			else            ++nFaces[Front];
-		}
+				neiv=vxlImg(ix,iy,iz+1);
+				if (iz!=n.z)  {
+					if (neiv)     ++nFaces[neiv];
+					else          ++nFaces[Internal]; }
+				else if (neiv)  ++nFaces[neiv];
+				else            ++nFaces[Front];
+			}
 
 
 	(cout<<",  nCells: "+_s(nCells)+",    B:nFaces: ").flush();
@@ -338,11 +338,11 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 		boundary<<
 		"FoamFile\n"
 		"{\n"
-		"	version	 2.0;\n"
-		"	format	  ascii;\n"
-		"	class	   polyBoundaryMesh;\n"
-		"	location	\""<<Folder+"\";\n"
-		"	object	  boundary;\n"
+		"	version  2.0;\n"
+		"	format   ascii;\n"
+		"	class    polyBoundaryMesh;\n"
+		"	location \""<<Folder+"\";\n"
+		"	object   boundary;\n"
 		"}\n\n";
 
 
@@ -380,7 +380,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 		int iLastFace = nFaces[Internal];
 
 		//write_boundary(true, Grainwalls,"patch");
-		for(int ib=1;ib<nVVs;++ib)  write_boundary(1, ib,"patch");
+		for(int ib=1; ib<nVVs; ++ib)  write_boundary(1, ib,"patch");
 
 		write_boundary(procIsijk(iPrc-1,jPrc,kPrc)<0, Left,"patch");
 		write_boundary(procIsijk(iPrc+1,jPrc,kPrc)<0, Right,"patch");
@@ -408,12 +408,12 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	//=======================================================================
 
-	cout<<"creating faces  "<<endl;
+	cout<<"creating faces"<<endl;
 
 
 	array<vector<array<int,6> >,255> faces_bs;
 	size_t sumnFaces=0;
-	for(int ib=0;ib<255;++ib)  if(nFaces[ib])  {
+	for(int ib=0; ib<255; ++ib)  if(nFaces[ib])  {
 		sumnFaces+=nFaces[ib];
 		faces_bs[ib].resize(nFaces[ib]);
 		fill(faces_bs[ib].begin(),faces_bs[ib].end(), array<int,6>{{-1,-1,-1,-1,-1,-1}});
@@ -422,20 +422,20 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	voxelField<int3> ownerMapper(n.x+1,n.y+1,n.z+1,int3(-1,-1,-1));
 
 
-	cout<<"collecting faces  "<<endl;
+	cout<<"collecting faces"<<endl;
 
 
 	#define recordF_m( l10,l11,l20,l21,l30,l31,dir,ii,jj,kk,type )            \
 	{	if (ownerMapper(ii,jj,kk)[dir]<0) {                                      \
-		++iFaces[type] ;																		 \
-		ownerMapper(ii,jj,kk)[dir]=iFaces[type] + iStartFaces[type];	              \
-		faces_bs[type][iFaces[type]][4]=iCells;	/* cell number (for owners) */         \
-		faces_bs[type][iFaces[type]][0]=point_mapper(ii,jj,kk);								  \
-		faces_bs[type][iFaces[type]][1]=point_mapper(ii+l11,jj+l21,kk+l31);					\
-		faces_bs[type][iFaces[type]][2]=point_mapper(ii+l10+l11,jj+l20+l21,kk+l30+l31);  \
-		faces_bs[type][iFaces[type]][3]=point_mapper(ii+l10,jj+l20,kk+l30);					\
-	}																			   \
-	else {																		   \
+			++iFaces[type] ;																		                    \
+			ownerMapper(ii,jj,kk)[dir]=iFaces[type] + iStartFaces[type];	           \
+			faces_bs[type][iFaces[type]][4]=iCells;	/* cell number (for owners) */    \
+			faces_bs[type][iFaces[type]][0]=point_mapper(ii,jj,kk);								     \
+			faces_bs[type][iFaces[type]][1]=point_mapper(ii+l11,jj+l21,kk+l31);					\
+			faces_bs[type][iFaces[type]][2]=point_mapper(ii+l10+l11,jj+l20+l21,kk+l30+l31); \
+			faces_bs[type][iFaces[type]][3]=point_mapper(ii+l10,jj+l20,kk+l30);				    	\
+		}                                                                                 \
+		else {																		                                         \
 			faces_bs[type][ownerMapper(ii,jj,kk)[dir]][5]=iCells; /*index of neighbour cell*/ \
 	}	}
 
@@ -451,10 +451,10 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	array<int,255> iFaces; iFaces.fill(-1);
 
-	for (int iz=1;iz<=n.z;iz++)  {  cout<<(iz%80 ? '.' : '\n');cout.flush();
-	 for (int iy=1;iy<=n.y;iy++)
-	  for (int ix=1;ix<=n.x;ix++)
-		if (!vxlImg(ix,iy,iz))  {
+	for (int iz=1; iz<=n.z; iz++)  {  cout<<(iz%80 ? '.' : '\n');cout.flush();
+	 for (int iy=1; iy<=n.y; iy++)
+	  for (int ix=1; ix<=n.x; ix++)
+		 if (!vxlImg(ix,iy,iz)) {
 			iCells++;
 
 			unsigned char
@@ -467,8 +467,8 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 			neiv=vxlImg(ix+1,iy,iz);
 			if (ix!=n.x)  {
-			  if (neiv)       iuclockwiseRecordF(neiv)
-			  else            iuclockwiseRecordF(Internal)   }
+				if (neiv)       iuclockwiseRecordF(neiv)
+				else            iuclockwiseRecordF(Internal)   }
 			else if (neiv)    iuclockwiseRecordF(neiv)
 			else              iuclockwiseRecordF(Right)
 
@@ -510,8 +510,8 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	//=======================================================================
 
-  {
-	ofstream faces(Folder+"/faces");	assert(faces);
+ {
+	ofstream faces(Folder+"/faces");  assert(faces);
 	faces<<
 		"FoamFile\n"
 		"{\n"
@@ -527,20 +527,20 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 	owner<<
 		"FoamFile\n"
 		"{\n"
-		"	version	 2.0;\n"
-		"	format	  ascii;\n"
-		"	class	   labelList;\n"
-		"	location	\""<<Folder+"\";\n"
-		"	object	  owner;\n"
+		"	version  2.0;\n"
+		"	format   ascii;\n"
+		"	class    labelList;\n"
+		"	location \""<<Folder+"\";\n"
+		"	object   owner;\n"
 		"}\n\n"<<sumnFaces<<"\n("<<endl;
 
 	#define write_faces_owners(ipp) \
-	 for (const auto& ff:faces_bs[ipp])  { \
+	 for (const auto& ff:faces_bs[ipp]) { \
 		faces<<'('<<ff[0]<<' '<<ff[1]<<' '<<ff[2]<<' '<<ff[3]<<")\n"; \
 		owner<<ff[4]<<"\n";  \
 	}
 	//write_faces_owners(Internal)
-	for(int ib=0;ib<nVVs;++ib)  	write_faces_owners(ib)
+	for(int ib=0;ib<nVVs;++ib)           write_faces_owners(ib)
 	if (procIsijk(iPrc-1,jPrc,kPrc)<0)   write_faces_owners(Left)
 	if (procIsijk(iPrc+1,jPrc,kPrc)<0)   write_faces_owners(Right)
 	if (procIsijk(iPrc,jPrc-1,kPrc)<0)   write_faces_owners(Bottom)
@@ -558,7 +558,7 @@ void toFoam(voxelImage& vxlImg, int nVVs, const voxelField<int>& procIsijk, int 
 
 	faces<<")"<<endl;
 	owner<<")"<<endl;
-  }
+ }
 
 
 

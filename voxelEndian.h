@@ -1,5 +1,7 @@
-//stackoverflow : Kevin: https://stackoverflow.com/a/105342/2718352
-//How do I convert between big-endian and little-endian values in C++?
+#pragma once
+
+// stackoverflow : Kevin: https://stackoverflow.com/a/105342/2718352
+// How do I convert between big-endian and little-endian values in C++?
 
 template<typename T> inline T be2le(T vv) {
 	std::cout<<"err"<<std::endl; alert("not implemented",-1);	return vv; }
@@ -16,8 +18,7 @@ template<> inline unsigned long long  be2le(unsigned long long ull)  {
 
 
 template<typename T, template<typename ...> class C>
-void flipEndian(C<T>& vImage)
-{
+void flipEndian(C<T>& vImage) {
 	if(sizeof(T)>1)
 		std::transform(vImage.begin(), vImage.end(), vImage.begin(), be2le<T>);
 }

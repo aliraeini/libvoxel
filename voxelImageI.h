@@ -120,7 +120,6 @@ template<typename T>   void voxelField<T>::reset(int3 nnn)  {
 }
 
 template<typename T>   void voxelField<T>::reset(int3 nnn, T value)  {
-	this->data_.resize(0);
 	nij_=size_t(nnn.x)*nnn.y;
 	this->data_.resize(size_t(nnn.z)*nij_,value);
 	nnn_=nnn;
@@ -238,7 +237,7 @@ inline void getAmiraHeaderSize(const std::string& fnam, int3& nnn, dbl3& dx_, db
 			RLE = tmpStr.size()>11 && tmpStr.compare(3,9,"HxByteRLE") == 0;
 		}
 	}
-	nnn.z=std::min(nnn.z,maxNz);
+	if (nnn.z>1.1*maxNz+2)  nnn.z = maxNz;
 	nSkipBytes = hdr.tellg(); ++nSkipBytes; //++ is for '\n' after "@1"
 }
 
@@ -289,16 +288,21 @@ template<typename T>   int voxelField<T>::readBin(std::string fnam, int nSkipByt
 		char count=0;
 		char val=0;
 		//ensure(sizeof(T)==1,"Only 8bit .am files are supported");
-		char* vp= reinterpret_cast<char*>(&*voxelField<T>::data_.begin());
-		while(vp<reinterpret_cast<char*>(&*voxelField<T>::data_.end()))  {
+		char*      vp = reinterpret_cast<char*>(voxelField<T>::data_.data());
+		char*const ve =reinterpret_cast<char*>(std::to_address(voxelField<T>::data_.end()));
+		while(vp<ve)  {
 			in.get(count); in.get(val);
 			if(count&char(0x80)) {
 				*vp=val;
 				count&=0x7f;
+				if (count > ve-vp) [[unlikely]] count = char(ve-vp); // for maxNz
 				while((--count)!=0) { in.get(val); *(++vp)=val; }
 				++vp;
 			}
-			else  {  std::fill(vp,vp+count,val);  vp+=count;  }
+			else  {
+				if (count > ve-vp) [[unlikely]] count = char(ve-vp); // for maxNz
+				std::fill(vp,vp+count,val);  vp+=count;
+			}
 		}
 	}
 	else  {
