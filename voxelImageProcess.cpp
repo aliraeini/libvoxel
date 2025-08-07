@@ -13,14 +13,10 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 \*-------------------------------------------------------------------------*/
 
 
-
-
-#include "voxelImage.h"
+#include "voxelImageI.h"
 
 using namespace std;
 
-
-#include "voxelImage.cpp"
 
 int usage()  {
 	cout<<"\nvoxelImageProcess:\n utility to read a 3D image\n optionally run some image processing commands on it (cropD, threshold, ...),"

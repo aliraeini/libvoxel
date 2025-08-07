@@ -32,10 +32,8 @@ https://www.imperial.ac.uk/earth-science/research/research-groups/pore-scale-mod
 using namespace std;
 
 
-#include "voxelImage.h"
+#include "voxelImageI.h"
 #include "voxelRegions.h"
-
-#include "voxelImage.cpp"
 
 int usage()  {
 	cout<<

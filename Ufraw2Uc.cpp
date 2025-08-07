@@ -18,9 +18,8 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 #include <vector>
 
 #include <assert.h>
-#include "voxelImage.h"
+#include "voxelImageI.h"
 
-#include "voxelImage.cpp"
 
 using namespace std;
 

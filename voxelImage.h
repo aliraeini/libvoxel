@@ -407,3 +407,13 @@ typedef voxelImageT<unsigned char> voxelImage;   //! default image type
 	for (int i_nei_rel=r1; i_nei_rel<=r2; i_nei_rel+=_nNei)
 
 #endif  /// voxelImageMacros_H
+
+
+// backward compatibility with ICL-2021 versions TODO: delete
+#ifndef MS_VERSION
+#define MS_VERSION 1
+#endif
+#if MS_VERSION < 2
+#define _ExtraVxlTypes
+#include "voxelImageI.h"
+#endif

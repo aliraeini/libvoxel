@@ -25,12 +25,10 @@ your option) any later version. see <http://www.gnu.org/licenses/>.
 #include <valarray>
 #include <iostream>
 
-#include "voxelImage.h"
+#include "voxelImageI.h"
 
 using namespace std;
 
-
-#include "voxelImage.cpp"
 
 int usage()  {
 	cout<<"convert micro-CT images to OpenFOAM mesh"<<endl;
