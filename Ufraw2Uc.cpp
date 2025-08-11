@@ -58,11 +58,13 @@ int main(int argc, char** argv)  {
 
 	std::cout<<" Ufraw2Uc "+imgExt()+"  "+headerName+"  "<<writeFrmt<<endl;
 
-	voxelImage vimage(headerName);
-	ensure(vimage.nz(), headerName+" not read",-1);
-	int3 n=vimage.size3();
-	if(writeFrmt=="dat") vimage.write("vxlImage.dat");
-	vimage.data_.resize(0);
+	int3 n;
+	{
+		voxelImage vimage(headerName);
+		ensure(vimage.nz(), headerName+" not read",-1);
+		n = vimage.size3();
+		if(writeFrmt=="dat") vimage.write("vxlImage.dat");
+	}
 
 	voxelImageT<float> Umg;
 	if (wUmag[0]=='U') Umg.reset(n[0],n[1],n[2],0.);

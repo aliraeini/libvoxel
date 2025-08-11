@@ -114,6 +114,7 @@ class voxelField {
 	void replacexLayer(int i, int fromi);
 	void setBlock(int n1, int n2, int n3, const voxelField<T>&Values);
 	void setFrom(const voxelField<T>&Values, int n1, int n2, int n3);
+	void swapData(voxelField<T>& other) noexcept;
 
 
 	const T& operator()(int i, int j, size_t k) const { return data_[k*nij_+j*nnn_.x+i]; }

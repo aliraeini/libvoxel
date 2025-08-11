@@ -121,7 +121,7 @@ template<typename T>   void voxelField<T>::reset(int3 nnn)  {
 
 template<typename T>   void voxelField<T>::reset(int3 nnn, T value)  {
 	nij_=size_t(nnn.x)*nnn.y;
-	this->data_.resize(size_t(nnn.z)*nij_,value);
+	this->data_.assign(size_t(nnn.z)*nij_, value);
 	nnn_=nnn;
 }
 
@@ -638,10 +638,10 @@ template<typename T> void voxelImageT<T>::write(std::string fnam) const  {
 
 
 template<typename T>
-void copy(const voxelImageT<T>& img2, int3 frm,  int3 to, voxelImageT<T>& img, int3 at)  {
+void vxlCopy(const voxelImageT<T>& img2, int3 frm,  int3 to, voxelImageT<T>& img, int3 at)  {
 	for (int k=frm.z; k<to.z; k++)
 		for (int j=frm.y; j<to.y; ++j)
-			std::copy(&img2(frm.x,j,k), &img2(to.x,j,k), &img(at.x,at.y+j-frm.y,at.z+k-frm.z));
+			std::copy(&img2(frm.x, j, k),  &img2(to.x, j, k),  &img(at.x, at.y+j-frm.y, at.z+k-frm.z));
 }
 
 
@@ -663,7 +663,8 @@ void voxelImageT<T>::cropD( int3 frm,  int3 to, int emptylyrs, T eLyrsValue, boo
 
 	X0_+=(frm-emptylyrs)*dx_;
 
-	voxelImageT<T> tmp=*this;
+	voxelImageT<T> tmp;
+	tmp.swapData(*this);
 
 	if (emptylyrs)
 	{
@@ -672,7 +673,8 @@ void voxelImageT<T>::cropD( int3 frm,  int3 to, int emptylyrs, T eLyrsValue, boo
 	}
 	else this->reset(to-frm);
 
-	::copy(tmp,frm,to,*this,int3(emptylyrs,emptylyrs,emptylyrs));
+
+	vxlCopy(tmp, frm, to, *this, int3(emptylyrs,emptylyrs,emptylyrs));
 }
 
 
@@ -722,6 +724,13 @@ void voxelField<T>::setBlock(int n1, int n2, int n3, const voxelField<T>& Values
 template<typename T>
 void voxelField<T>::setFrom(const voxelField<T>&Values, int n1, int n2, int n3)  { // from image with  lager size,
 	forAllkji_(*this)	(*this)(i,j,k)=Values(i+n1,j+n2,k+n3);
+}
+
+template<typename T>
+void voxelField<T>::swapData(voxelField<T>&other) noexcept {
+	std::swap(nij_, other.nij_);
+	std::swap(nnn_, other.nnn_);
+	std::swap(data_, other.data_);
 }
 
 template<typename T>
