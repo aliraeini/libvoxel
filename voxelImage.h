@@ -205,6 +205,7 @@ class voxelImageT: public voxelImageTBase, public voxelField<T>  {
 	void rotate(char direction);
 	void PointMedian032(int nAdj0, int nAdj1, T lbl0, T lbl1);
 	size_t FaceMedian06(int nAdj0,int nAdj1); // obsolete
+	void mode(short nNeist, bool verbose=false); // depricated, use standalone version
 	void zeroGrad(int nlyr);
 
 	void AND(const voxelImageT& data2);

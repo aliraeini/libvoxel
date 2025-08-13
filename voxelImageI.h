@@ -1236,6 +1236,11 @@ long long mode(voxelImageT<T>& vImg, short minDif, bool verbose)  {
 }
 
 template<typename T>
+void voxelImageT<T>::mode(short minDif, bool verbose)  { // ICL version compatibility
+	::mode(*this, minDif, verbose);
+}
+
+template<typename T>
 long long modeNSames(voxelImageT<T>& vImage, const short nSameNei, bool verbose=false)  {
 	long long nChanges = 0;
 	voxelImageT<T> vxls=vImage;
